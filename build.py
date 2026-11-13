@@ -30,7 +30,24 @@ import urllib.request
 import zipfile
 from collections import Counter, defaultdict
 
-FMT = 1
+FMT = 2
+
+# Names too long for a watch screen. Stations keep their official name unless listed here;
+# destinations (where a train is heading) get the shorter form.
+SHORT_STOP = {
+    "NorteShopping I Sete Bicas": "Sete Bicas",
+    "VC Fashion Outlet I Modivas": "Modivas Outlet",
+}
+SHORT_DEST = {
+    "Senhor de Matosinhos": "Sr. Matosinhos",
+    "Senhora da Hora": "Sra. da Hora",
+    "Estádio do Dragão": "Dragão",
+    "Póvoa de Varzim": "Póvoa",
+    "Hospital São João": "H. São João",
+    "Hospital Santos Silva": "H. Santos Silva",
+    "NorteShopping I Sete Bicas": "Sete Bicas",
+    "VC Fashion Outlet I Modivas": "Modivas Outlet",
+}
 SOURCE_PAGE = "https://www.metrodoporto.pt/pages/337"
 FALLBACK_API = ("https://dadosabertos.cm-porto.pt/api/3/action/package_show"
                 "?id=horarios-paragens-e-rotas-metro-porto")
@@ -135,8 +152,9 @@ def minutes(hms):
 
 
 def build(t):
-    stops = {int(r["stop_id"]): (r["stop_name"], round(float(r["stop_lat"]), 5), round(float(r["stop_lon"]), 5))
-             for r in t["stops"]}
+    stops = {int(r["stop_id"]): (SHORT_STOP.get(r["stop_name"], r["stop_name"]),
+                                  round(float(r["stop_lat"]), 5), round(float(r["stop_lon"]), 5))
+             for r in t["stops"] if r.get("stop_id")}
     routes = {r["route_id"]: r for r in t["routes"]}
     trips = {r["trip_id"]: r for r in t["trips"]}
 
@@ -163,7 +181,7 @@ def build(t):
         if key not in pat_index:
             pat_index[key] = len(patterns)
             head = trips[tid].get("trip_headsign") or stops[seq[-1]][0]
-            patterns.append([line_ids.index(key[0]), head, list(seq)])
+            patterns.append([line_ids.index(key[0]), SHORT_DEST.get(head, head), list(seq)])
         trip_pat[tid] = pat_index[key]
 
     # which services run on which date
@@ -250,7 +268,7 @@ def main():
     today = dt.date.fromisoformat(a.today) if a.today else dt.date.today()
 
     zip_bytes, src = get_feed(a.zip)
-    version = hashlib.sha256(zip_bytes).hexdigest()[:12]
+    version = hashlib.sha256(zip_bytes).hexdigest()[:12] + "-f" + str(FMT)
     feed = read_feed(zip_bytes)
     if len(feed["stops"]) < 50 or len(feed["trips"]) < 1000 or len(feed["stop_times"]) < 20000:
         if not a.zip:
