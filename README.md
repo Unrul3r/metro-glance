@@ -11,7 +11,7 @@ and, when it has changed, rewrites the small files under `data/` that the watch 
 |---|---|
 | `data/version.json` | Version id, validity dates, and a `stale` flag when the timetable has expired |
 | `data/calendar.json` | Day type per weekday, plus exception dates such as public holidays |
-| `data/stops.json` | Every station: id, name, latitude, longitude |
+| `data/stops.json` | `s`: every station as id, name, latitude, longitude |
 | `data/patterns.json` | Lines, and each distinct sequence of stops a train follows |
 | `data/groups.json` | For each station, the directions trains leave in |
 | `data/d/<stop>_<next>_<daytype>.json` | Departures from `<stop>` towards `<next>`: minutes after midnight (`t`) and pattern (`p`) |

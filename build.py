@@ -30,7 +30,7 @@ import urllib.request
 import zipfile
 from collections import Counter, defaultdict
 
-FMT = 2
+FMT = 3
 
 # Names too long for a watch screen. Stations keep their official name unless listed here;
 # destinations (where a train is heading) get the shorter form.
@@ -301,7 +301,7 @@ def main():
         sizes.append(dump(os.path.join(ddir, f"{stop}_{nxt}_{ty}.json"),
                           {"t": [m for m, _ in rows], "p": [p for _, p in rows]}))
     info = {
-        "stops.json": dump(os.path.join(a.out, "stops.json"), b["stops"]),
+        "stops.json": dump(os.path.join(a.out, "stops.json"), {"s": b["stops"]}),
         "patterns.json": dump(os.path.join(a.out, "patterns.json"), {"lines": b["lines"], "pat": b["patterns"]}),
         "groups.json": dump(os.path.join(a.out, "groups.json"), b["groups"]),
         "calendar.json": dump(os.path.join(a.out, "calendar.json"), b["calendar"]),
